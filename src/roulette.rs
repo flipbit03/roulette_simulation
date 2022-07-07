@@ -1,9 +1,4 @@
-use std::thread::panicking;
-
-use rand::{
-    prelude::{SliceRandom, ThreadRng},
-    thread_rng,
-};
+use rand::prelude::{SliceRandom, ThreadRng};
 
 use crate::enums::RouletteColor;
 
@@ -11,7 +6,7 @@ pub trait RouletteChooser {
     fn play(&mut self, colors: &Vec<RouletteColor>) -> RouletteColor;
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Roulette<T> {
     colors: Vec<RouletteColor>,
     chooser: T,
@@ -27,7 +22,7 @@ where
         }
         let mut colors: Vec<RouletteColor> = Vec::new();
 
-        (0..(size - 1) / 2).into_iter().for_each(|n| {
+        (0..(size - 1) / 2).into_iter().for_each(|_| {
             colors.push(RouletteColor::BLACK);
             colors.push(RouletteColor::RED);
         });
