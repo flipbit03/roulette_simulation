@@ -16,10 +16,14 @@ impl<T> Roulette<T>
 where
     T: RouletteChooser,
 {
-    pub fn new(size: u8, chooser: T) -> Self {
-        if size % 2 != 1 {
-            panic!("size must be even")
-        }
+    pub fn new(size: usize, no_green: bool, chooser: T) -> Self {
+        let size_is_even = size % 2 == 0;
+        match (size_is_even, no_green) {
+            (true, false) => panic!("Size must be odd if you want the the GREEN piece"),
+            (false, true) => panic!("Size must be even if you don't want the the GREEN piece"),
+            (true, true) | (false, false) => (),
+        };
+
         let mut colors: Vec<RouletteColor> = Vec::new();
 
         (0..(size - 1) / 2).into_iter().for_each(|_| {
