@@ -1,6 +1,11 @@
 use clap::Parser;
+use rand::thread_rng;
 
-use crate::{enums::RouletteColor, player::RoulettePlayer, roulette::Roulette};
+use crate::{
+    enums::RouletteColor,
+    player::RoulettePlayer,
+    roulette::{BiasedRouletteChoser, Roulette},
+};
 
 pub mod enums;
 pub mod player;
@@ -24,21 +29,33 @@ fn main() {
 
     println!("config = {:?}", &config);
 
-    let mut r = Roulette::new(37);
+    // let mut r = Roulette::new(
+    //     37,
+    //     BiasedRouletteChoser::new(vec![
+    //         RouletteColor::RED,
+    //         RouletteColor::RED,
+    //         RouletteColor::RED,
+    //         RouletteColor::BLACK,
+    //     ]),
+    // );
+    let mut r = Roulette::new(
+        37,
+        thread_rng()
+    );
 
     let mut p = RoulettePlayer::new(&mut r, config.max_loss_streak, config.minimum_bet);
 
     (0..config.bet_count).into_iter().for_each(|bet_number| {
         let bet = match bet_number % 2 {
-            0 => RouletteColor::RED,
+            0 => RouletteColor::BLACK,
             _ => RouletteColor::BLACK,
         };
 
-        if bet_number % (config.bet_count / 100) == 0 {
+        if config.bet_count > 100 && bet_number % (config.bet_count / 100) == 0 {
             println!("{}", &p);
         }
 
-        (&mut p).bet(bet, None);
+        (&mut p).bet(bet, None, false);
     });
 
     println!("{}", p);
