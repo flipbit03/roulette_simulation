@@ -1,8 +1,9 @@
 use clap::Parser;
 use itertools::Itertools;
 use rand::thread_rng;
+use rayon::iter::{IntoParallelIterator, ParallelIterator};
 
-use crate::{enums::RouletteColor, player::RoulettePlayer, roulette::Roulette};
+use crate::{enums::RouletteColor, player::{RoulettePlayer, RoulettePlayerStats}, roulette::Roulette};
 
 pub mod enums;
 pub mod player;
@@ -29,11 +30,10 @@ fn main() {
 
     println!("config = {:?}", &config);
 
-    let r = Roulette::new(37, thread_rng());
-
-    let games_played = (0..config.game_count)
-        .into_iter()
+    let games_played: Vec<RoulettePlayerStats> = (0..config.game_count)
+        .into_par_iter()
         .map(|player_number| {
+            let r = Roulette::new(37, thread_rng());
             let mut player_roulette = r.clone();
             let mut p = RoulettePlayer::new(
                 format!("Player{}", player_number).to_string(),
@@ -65,12 +65,12 @@ fn main() {
             }
             p.get_stats()
         })
-        .collect_vec();
+        .collect();
 
     let sorted_by_balance_games_played = games_played
         .iter()
         .sorted_by(|r1, r2| {
-            Ord::cmp(&((r1.get_balance() * 1000.0) as i32), &((r2.get_balance() * 1000.0) as i32))
+            r1.get_balance().partial_cmp(&r2.get_balance()).unwrap()
         }).collect_vec();
 
     let total_games = sorted_by_balance_games_played.iter().count();
@@ -79,7 +79,7 @@ fn main() {
         .filter(|p| p.won()).count();
 
     println!("========================");
-    for (gn, gp) in games_played.iter().enumerate() {
+    for (gn, gp) in sorted_by_balance_games_played.iter().enumerate() {
         println!("Player{}: {}", gn, gp);
     }
     println!("========================");
