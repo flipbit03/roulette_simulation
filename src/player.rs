@@ -109,13 +109,10 @@ where
         }
     }
 
-    pub fn bet(&mut self, bet: RouletteColor, custom_bet_value: Option<f64>, debug: bool) {
+    pub fn bet(&mut self, bet: &RouletteColor, custom_bet_value: Option<f64>, debug: bool) {
         let bet_value = match custom_bet_value {
             Some(set_bet_value) => set_bet_value,
-            None => match self.stats.losing_streak > 0 {
-                true => (self.config.minimum_bet * 2.0).powf(self.stats.losing_streak as f64),
-                false => self.config.minimum_bet,
-            },
+            None => (self.config.minimum_bet) * (2.0_f64).powf(self.stats.losing_streak as f64)
         };
 
         if bet_value > self.stats.biggest_best {
@@ -125,7 +122,7 @@ where
         let roulette_result = self.roulette.play();
 
         self.stats.played_games += 1;
-        let won = roulette_result == bet;
+        let won = roulette_result == *bet;
         let won_str = match won {
             true => {
                 self.win(bet_value);

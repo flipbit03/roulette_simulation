@@ -4,16 +4,11 @@ use clap::Parser;
 use itertools::Itertools;
 use rand::thread_rng;
 use rayon::iter::{IntoParallelIterator, ParallelIterator};
-
-use crate::{
+use roulette_simulation::{
     enums::RouletteColor,
     player::{RoulettePlayer, RoulettePlayerStats},
     roulette::Roulette,
 };
-
-pub mod enums;
-pub mod player;
-pub mod roulette;
 
 #[derive(Parser, Debug)]
 #[clap(author, version, about, long_about = None)]
@@ -71,7 +66,7 @@ fn main() {
                     _ => RouletteColor::BLACK,
                 };
 
-                p.bet(bet, None, false);
+                p.bet(&bet, None, false);
 
                 if (config.player_bet_count > 100
                     && bet_number % (config.player_bet_count / 100) == 0)
