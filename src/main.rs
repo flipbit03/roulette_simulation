@@ -10,6 +10,7 @@ use roulette_simulation::{
     roulette::Roulette,
 };
 
+/// Simulates playing the Roulette with a Martingale-like doubling strategy
 #[derive(Parser, Debug)]
 #[clap(author, version, about, long_about = None)]
 pub struct RouletteSimulationCLIConfig {
@@ -33,7 +34,7 @@ pub struct RouletteSimulationCLIConfig {
     #[clap(default_value_t = 37, value_parser)]
     pub table_size: usize,
 
-    /// Don't generate the GREEN piece?
+    /// Don't generate the GREEN 
     #[clap(short, long, action)]
     no_green: bool,
 }
@@ -52,8 +53,7 @@ fn main() {
     let games_played: Vec<RoulettePlayerStats> = (0..config.game_count)
         .into_par_iter()
         .map(|player_number| {
-            let r = Roulette::new(config.table_size, config.no_green, thread_rng());
-            let mut player_roulette = r.clone();
+            let mut player_roulette = Roulette::new(config.table_size, config.no_green, thread_rng());
             let mut p = RoulettePlayer::new(
                 format!("Player{}", player_number).to_string(),
                 &mut player_roulette,
